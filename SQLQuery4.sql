@@ -225,3 +225,4 @@ GO
 --SELECT * FROM Sales_Order
 --PIVOT (SUM(Quantity) FOR Product IN ([Laptop][IPhone])) AS PrivotedOrder;
 --UNPIVOT (Quantity FOR Product IN ([Laptop],[IPhone])) AS UnPVT;
+
