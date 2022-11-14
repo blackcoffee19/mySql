@@ -1,4 +1,5 @@
 --Tao view 
+USE StudentDB2
 CREATE VIEW vwStudentGirl1
 AS
 SELECT * FROM tbStudent
@@ -28,7 +29,7 @@ SELECT TOP 3 *
 FROM tbMark
 ORDER BY mark DESC
 GO
-
+SELECT * FROM vwHighestMark
 --liet ke tat ca sinh vien co diem tu cao xuong thap
 CREATE VIEW vwHighMark
 AS SELECT TOP 100 *
@@ -36,22 +37,19 @@ FROM tbMark
 ORDER BY mark DESC
 GO
 --Xem view 
-SELECT * FROM vwHighestMark
+SELECT * FROM vwHighMark
 GO
 
 --Xu ly du lieu tren View
 --Doi voi view tao tu 1 bang vwStudentGirl
 --insert du lieu vao view
-INSERT INTO vwStudentGirl VALUES('SV07','Lan','2005-02-10','Female','SV01')
+INSERT INTO vwStudentGirl1 VALUES('SV07','Lan','2005-02-10','Female','SV01')
 GO
 
 --kiem tra du lieu trong view
-SELECT * FROM vwStudentGirl
+SELECT * FROM vwStudentGirl1
 GO
 
---Kiem tra du lieu trong view
-SELECT * FROM vwStudent Girl
-GO
 --Kiem tra du lieuj vao bang co so -> da them vao
 SELECT * FROM tbStudent
 GO
@@ -63,7 +61,7 @@ INSERT INTO tbStudent VALUES ('SV09','Mai','1996-09-06','Female',NULL);
 GO
 
 --Kiem tra trong view xem co sv moi ko? -> Co
-SELECT * FROM vwStudentGirl
+SELECT * FROM vwStudentGirl1
 GO
 
 --view tao tu nhieu bang vwStudentMark
@@ -73,13 +71,13 @@ GO
 
 --update du lieu tren view
 --view tu 1 bang
-UPDATE vwStudentGirl
+UPDATE vwStudentGirl1
 SET dob = '1997-09-05'
 WHERE st_name='Mai'
 GO
 
 --xem du lieu tren view va bang co so
-SELECT * FROM vwStudentGirl
+SELECT * FROM vwStudentGirl1
 GO
 SELECT * FROM tbStudent
 GO
@@ -98,11 +96,11 @@ GO
 
 --delete tren view
 --view tren 1 bang
-DELETE vwStudentGirl
+DELETE vwStudentGirl1
 WHERE st_name = 'Mai'
 GO
 --xem du lieu tren view va bang co so
-SELECT * FROM vwStudentGirl
+SELECT * FROM vwStudentGirl1
 GO
 SELECT * FROM tbStudent
 GO
@@ -113,11 +111,12 @@ WHERE st_name = 'Tuong' AND sb_name='AJS'
 GO
 
 --view vwStudentGirl -> Them sv Boy vao
-INSERT INTO vwStudentGirl VALUES ('SV10','Vinh','2005-02-10','Male','SV01')
+INSERT INTO vwStudentGirl1 VALUES ('SV10','Vinh','2005-02-10','Male','SV01')
 GO
-
+SELECT * FROM vwStudentGirl1
+GO
 --thay doi cau truc cua view, tao rang buoc ko cho them sv boy vao
-ALTER VIEW vsStudentGirl
+ALTER VIEW vwStudentGirl1
 AS
 SELECT * FROM tbStudent
 WHERE gender ='Female'
@@ -125,7 +124,7 @@ WITH CHECK OPTION
 GO
 
 --them sv la male vao-> Ko them duoc do vi pham rang buoc
-INSERT INTO vwStudentGirl VALUES ('SV10','An','2005-02-10','Male','SV01')
+INSERT INTO vwStudentGirl1 VALUES ('SV10','An','2005-02-10','Male','SV01')
 GO
 
 --with schemabinding: bang co so ko duoc thay doi cau truc khi view tao bang cach nay
