@@ -29,6 +29,14 @@ GO
 EXEC uspGender 'Tri'
 GO
 
-CREATE PROC uspMark @name VARCHAR(50), @monhoc VARCHAR(30)
+CREATE PROC uspMark @name VARCHAR(50), @subject VARCHAR(50)
 AS
+SELECT mark
+FROM tbMark M JOIN tbStudent S ON M.student=S.st_id
+JOIN tbSubject SB ON M.subject = SB.st_id
+WHERE st_name = @name AND sb_name = @subject
+GO
 
+--Chay thu tuc luu tru
+
+EXEC uspMark 'Hang','C'
