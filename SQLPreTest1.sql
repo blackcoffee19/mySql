@@ -1,5 +1,6 @@
 CREATE DATABASE dbPreTest1
 GO
+
 USE dbPreTest1
 CREATE TABLE tbRoom
 (
@@ -21,11 +22,11 @@ GO
 ALTER TABLE tbBooking
 ADD CONSTRAINT DateTo CHECK(DateTo > DateFrom)
 GO
-ALTER TABLE tbRoom 
-DROP CONSTRAINT Type
+ALTER TABLE dbo.tbRoom 
+DROP CONSTRAINT CK__tbRoom__Type__24927208
 
-ALTER TABLE tbRoom 
-ADD CONSTRAINT Type CHECK(Type='VIP'OR Type='Single' OR Type='Double')
+ALTER TABLE dbo.tbRoom 
+ADD CONSTRAINT CK_Type CHECK(Type='VIP'OR Type='Single' OR Type='Double')
 
 INSERT INTO tbRoom VALUES (101, 'Single',100),
 						(102, 'Single',100),
@@ -43,8 +44,8 @@ INSERT INTO tbBooking VALUES(1,101,'Julia','12/11/2020','14/11/2020'),
 							(3,201,'Ana','12/01/2021','14/01/2021'),
 							(3,202,'Ana','12/01/2021','14/01/2021')
 GO
-
-
+USE dbPreTest1
+SELECT * FROM tbBooking
 --5 
 CREATE VIEW vwBooking 
 WITH SCHEMABINDING
@@ -70,10 +71,11 @@ AS
 		SET UnitPrice = UnitPrice - @sales
 	END
 GO
+
 SELECT * FROM tbRoom
 EXEC uspPriceDecrease 
 GO
-EXEC uspPriceDecrease 55.5
+EXEC uspPriceDecrease 10.5
 GO
 
 --7.
@@ -86,3 +88,31 @@ AS
 	
 GO
 SELECT * FROM tbRoom
+DECLARE @count INT
+EXEC uspSpecificPriceIncrease 'Single',50,@count OUTPUT
+PRINT 'So phong Single tang them 50 la '+CONVERT(VARCHAR(50),@count);
+
+DECLARE @count2 INT
+EXEC uspSpecificPriceIncrease 'VIP',50,@count2 OUTPUT
+PRINT 'So phong Single tang them 50 la '+CONVERT(VARCHAR(50),@count2);
+
+DECLARE @count3 INT
+EXEC uspSpecificPriceIncrease 'Double',50,@count3 OUTPUT
+PRINT 'So phong Single tang them 50 la '+CONVERT(VARCHAR(50),@count3);
+
+CREATE PROC uspPriceIncrease @sales FLOAT = NULL
+AS
+	IF @sales IS NULL
+	BEGIN 
+		SELECT * FROM tbRoom 
+		ORDER BY UnitPrice
+	END 
+	ELSE 
+	BEGIN
+		UPDATE tbRoom
+		SET UnitPrice = UnitPrice + @sales
+	END
+GO
+
+EXEC uspPriceIncrease 20
+EXEC uspPriceIncrease
