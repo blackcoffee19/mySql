@@ -4,7 +4,7 @@ USE StudentDB2
 
 CREATE TABLE tbStudent
 (
-	st_id varchar(50) PRIMARY KEY NOT NULL,
+	st_id varchar(50) PRIMARY KEY NOT NULL NONCLUSTERED, 
 	st_name varchar(50),
 	dob datetime,
 	gender varchar(50) CHECK (gender='Female' OR gender='Male'),
