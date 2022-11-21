@@ -11,7 +11,7 @@ GO
 USE CarDB
 
 CREATE TABLE Car(
-    CarCode INT IDENTITY(1,1) PRIMARY KEY,
+    CarCode INT IDENTITY(1,1) PRIMARY KEY NONCLUSTERED,
     CarName VARCHAR(50) NOT NULL UNIQUE,
     Price MONEY CHECK(Price BETWEEN 1 AND 100000)
 )
@@ -42,10 +42,48 @@ GO
 INSERT INTO BillDetail (BillCode, CarCode, Qty) VALUES (1,4,2),
                                                         (2,5,1),
                                                         (5,3,2),
-                                                        (4,6,5),
-                                                        (4,7,1)
+                                                        (3,2,5),
+                                                        (4,2,1)
 GO
-SELECT * FROM Bill
+SELECT * FROM Car
 
 --R4
+DROP TABLE BillDetail 
+DROP TABLE Car
+CREATE CLUSTERED INDEX IX_CarName ON Car(CarName)
+GO
+--R5 
+CREATE VIEW CarBought 
+AS 
+	SELECT C.CarCode, CarName,Price, BD.Qty,B.BillDate
+	FROM Car C INNER JOIN BillDetail BD ON C.CarCode = BD.CarCode
+				INNER JOIN Bill B ON B.BillCode = BD.BillCode
+GO
+SELECT * FROM CarBought
 
+--R6 
+CREATE PROC PriceDecrease
+AS 
+	SELECT * FROM Car
+	UPDATE Car
+	SET Price = Price - 200
+	SELECT * FROM Car
+GO
+
+EXEC PriceDecrease 
+GO
+--R8 
+CREATE TRIGGER Case_Delete 
+ON Bill
+INSTEAD OF DELETE
+AS	
+	SELECT * FROM BillDetail;
+	DELETE BillDetail WHERE BillCode = (SELECT BillCode FROM deleted)
+	DELETE Bill WHERE BillCode = (SELECT BillCode FROM deleted)
+	SELECT * FROM BillDetail;	
+GO
+DROP TRIGGER Case_Delete
+SELECT * FROM BillDetail 
+DELETE Bill
+WHERE BillCode = 1
+GO
