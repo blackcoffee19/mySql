@@ -107,6 +107,7 @@ WHERE st_id = 'SV01'
 GO
 DELETE tbStudent
 WHERE st_id='SV05' --Error
+
 --tao 1 trigger delete, cho phep xoa ban 'Tuong'
 CREATE TRIGGER trigger_AcceptDelete
 ON tbStudent
