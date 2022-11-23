@@ -1,17 +1,17 @@
 CREATE DATABASE dbPretest4
 GO
-
+USE master
 USE dbPretest4
 
 CREATE TABLE tbStudents (
-    stID VARCHAR(5) PRIMARY KEY,
+    stID VARCHAR(5) PRIMARY KEY NONCLUSTERED,
     stName VARCHAR(50) NOT NULL,
     stAge TINYINT CHECK (stAge >=14 AND stAge <= 70),
     stGender BIT DEFAULT(1)
 )
 GO
 CREATE TABLE tbProjects (
-    pID VARCHAR(5) PRIMARY KEY,
+    pID VARCHAR(5) PRIMARY KEY NONCLUSTERED,
     pName VARCHAR(50) NOT NULL UNIQUE,
     pType VARCHAR(5) CHECK(pType = 'EDU' OR pType='DEP' OR pType='GOV'),
     pStartDate DATE NOT NULL DEFAULT(GETDATE())
@@ -20,10 +20,10 @@ GO
 
 CREATE TABLE tbStudentProject (
     studentID VARCHAR(5) NOT NULL FOREIGN KEY REFERENCES tbStudents(stID),
-    projectID VARCHAR(5) NOT NULL FOREIGN KEY REFERENCES tbProjects(pID),
+    projectID VARCHAR(5) NOT NULL FOREIGN KEY REFERENCES tbProjects(pID) ,
     joinedDate DATE NOT NULL DEFAULT(GETDATE()),
     rate TINYINT CHECK(rate BETWEEN 1 AND 5)
-    PRIMARY KEY (studentID, projectID)
+    PRIMARY KEY  NONCLUSTERED (studentID, projectID)
 )
 GO
 
@@ -52,6 +52,12 @@ INSERT INTO tbStudentProject VALUES ('S01','P20','12/02/2020',4),
 ('S04','P20','16/10/2020',3),
 ('S03','P23','04/07/2020',5)
 GO
+--4 
+CREATE CLUSTERED INDEX IX_stname ON tbStudents(stname)
+GO
+CREATE CLUSTERED INDEX IX_pID ON tbStudentProject(projectID)
+GO
+
 --5 
 CREATE VIEW vwStudentProject 
 WITH SCHEMABINDING
@@ -92,3 +98,15 @@ PRINT 'Rating trung binh Project cua Jane Fonda = '+CONVERT(VARCHAR(20),@AvgRate
 EXEC upRating 
 
 DROP PROC upRating
+--7 Create trigger ‘tgDeleteStudent’, it will remove all projects that student have worked for whenever a DEL statement triggered on table 'tbStudents'.
+CREATE TRIGGER tgDeleteStudent
+ON tbStudents
+INSTEAD OF DELETE
+AS 
+    DELETE tbStudentProject WHERE studentID IN (SELECT stID FROM deleted);
+    DELETE tbStudents WHERE stID = (SELECT stID FROM deleted)
+GO
+SELECT * FROM tbStudents
+SELECT * FROM tbStudentProject
+DELETE tbStudents
+WHERE stID = 'S02';

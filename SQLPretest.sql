@@ -1,8 +1,9 @@
 CREATE DATABASE PretestDB 
 GO
-
+USE master
+USE PretestDB
 CREATE TABLE tbCustomer(
-    CustCode VARCHAR(5) PRIMARY KEY,
+    CustCode VARCHAR(5) PRIMARY KEY NONCLUSTERED,
     CustName VARCHAR(30) NOT NULL,
     CustAddress VARCHAR(50) NOT NULL,
     CustPhone VARCHAR(15),
@@ -12,7 +13,7 @@ CREATE TABLE tbCustomer(
 GO
 
 CREATE TABLE tbMessage(
-    MsgNo INT IDENTITY(1000,1) PRIMARY KEY,
+    MsgNo INT IDENTITY(1000,1) PRIMARY KEY NONCLUSTERED,
     CustCode VARCHAR(5) FOREIGN KEY REFERENCES tbCustomer(CustCode),
     MsgDetails VARCHAR(300) NOT NULL,
     MsgDate DATETIME NOT NULL DEFAULT(GETDATE()),
@@ -59,3 +60,18 @@ GO
 DECLARE @num INT;
 EXEC uspCountStatus 'Pending', @num OUTPUT;
 PRINT 'So tin nhan trong trang thai Pending = '+CONVERT(VARCHAR(20),@num);
+
+--8 Create a trigger tgCustomerInvalid for table tbCustomer which will perform rollback transaction when a new record is inserted which customer has status is invalid and display appropriate messages.
+CREATE TRIGGER tgCustomerInvalid
+ON tbMessage
+FOR INSERT
+AS 
+    IF(SELECT CustStatus FROM tbCustomer WHERE CustCode IN (SELECT CustCode FROM inserted)) = 'Invalid'
+    BEGIN 
+        PRINT 'Customer is invalid can not add new message';
+        ROLLBACK
+    END
+GO
+set dateformat dmy
+INSERT INTO tbMessage VALUES('C004','HEllo WORLD','12-12-2012','Pending'),('C004','HEllo WORLD','12-12-2012','Resolved');
+GO

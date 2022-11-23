@@ -116,3 +116,52 @@ GO
 
 EXEC uspPriceIncrease 20
 EXEC uspPriceIncrease
+
+--8 Create a trigger named tgBookingRoom that allows one booking order having 3 rooms maximum.
+SELECT COUNT(BookingNo)
+FROM tbBooking 
+WHERE BookingNo =1
+GROUP BY BookingNo
+CREATE TRIGGER tgBookingRoom
+ON tbBooking
+FOR INSERT
+AS 
+	IF ((SELECT COUNT(BookingNo) FROM tbBooking 
+	WHERE BookingNo IN (SELECT BookingNo FROM inserted)
+	GROUP BY BookingNo ) >3)
+		BEGIN 
+			PRINT 'Khong the dat nhieu hon 3 phong'
+			ROLLBACK
+		END
+GO	
+DROP TRIGGER tgBookingRoom
+set dateformat dmy
+INSERT INTO tbBooking VALUES (1,301,'Julia','12/11/2020','14/11/2020');
+GO
+INSERT INTO tbBooking VALUES (1,201,'Julia','12/11/2020','14/11/2020');
+GO
+
+--9 Create a trigger named tgRoomUpdate that doing the following (using try-catch structure) : If new price is equal to 0 and this room has not existed in tbBooking, then remove it from tbRoom table else display an error message and roll back transaction.
+
+CREATE TRIGGER tgRoomUpdate
+ON tbRoom
+FOR UPDATE
+AS
+	IF (SELECT UnitPrice FROM inserted) = 0 
+	BEGIN TRY
+		IF (SELECT RoomNo FROM inserted) NOT IN (SELECT RoomNo FROM tbBooking)
+		BEGIN
+			DELETE FROM tbRoom
+			WHERE RoomNo =(SELECT RoomNo FROM inserted)
+		END
+		ELSE
+		BEGIN
+			PRINT 'Can not set price = 0 when room is booked'
+			ROLLBACK
+		END
+	END TRY
+	BEGIN CATCH 
+	SELECT ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH
+GO
+

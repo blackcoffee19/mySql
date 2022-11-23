@@ -59,3 +59,51 @@ GO
 SELECT Emp_Id, FullName,Designation, Salary FROM tbEmpDetail
 EXEC uspChangeSalary 200
 GO
+--7 Create a trigger tgInsertLeave for table tbLeaveDetails which will perform rollback transaction if total of leaves taken by employees in a year greater than 15 and display appropriate error message.
+USE dbPreTest3
+SELECT * FROM tbLeaveDetails
+CREATE TRIGGER tgInsertLeave 
+ON tbLeaveDetails 
+FOR INSERT
+AS 
+    IF(SELECT SUM(LeaveTaken) FROM tbLeaveDetails WHERE Emp_ID IN (SELECT Emp_ID FROM inserted))>15
+    BEGIN 
+        PRINT 'Employee cant leaves taken in a year greater than 15'
+        ROLLBACK
+    END
+GO
+DROP TRIGGER tgInsertLeave
+set dateformat dmy
+INSERT INTO tbLeaveDetails(Emp_ID,LeaveTaken,FromDate,ToDate,Reason) VALUES ('Emp02',12,'01-05-2010','01-06-2011','Do a project')
+GO
+
+--8 Create a trigger tgUpdateEmploee for table tbEmployeeDetails which removes the employee if new salary is reset to zero. 
+INSERT INTO tbLeaveDetails VALUES('Emp03',1,'20-10-2000','20-12-2000',''),
+                                ('Emp04',3,'20-10-2000','20-12-2000',''),
+                                ('Emp04',1,'20-10-2001','20-12-2002','')
+GO
+DELETE tbLeaveDetails
+WHERE Emp_Id IN (SELECT Emp_ID FROM tbLeaveDetails WHERE Emp_ID = 'Emp04');
+DELETE tbEmpDetail
+WHERE Emp_Id = 'Emp04'
+GO
+SELECT * FROM tbEmpDetail
+CREATE TRIGGER tgUpdateEmploee
+ON tbEmpDetail
+FOR UPDATE
+AS  
+    IF (SELECT Salary FROM inserted) =0
+    BEGIN   
+        DELETE tbLeaveDetails
+        WHERE Emp_Id IN (SELECT Emp_Id FROM tbLeaveDetails WHERE Emp_ID IN (SELECT Emp_ID FROM inserted));
+        DELETE tbEmpDetail
+        WHERE Emp_Id IN (SELECT Emp_Id FROM inserted)
+    END
+GO
+DROP TRIGGER tgUpdateEmploee
+SELECT * FROM tbEmpDetail
+SELECT * FROM tbLeaveDetails
+UPDATE tbEmpDetail
+SET Salary = 0
+WHERE FullName='Coffee'
+GO
